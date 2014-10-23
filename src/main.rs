@@ -54,9 +54,9 @@ fn todos_handler (request: &Request, response: &mut Response) {
         }
     }).collect::<Vec<Todo>>();
 
-    let results = json::encode(&results);
+    let results = results.to_json();
 
     response
         .content_type("json")
-        .send(format!("{{\"todos\":{}}}", results)); 
+        .send(format!("{}", results)); 
 }
