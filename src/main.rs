@@ -7,12 +7,26 @@ use nickel::{Nickel, Request, Response, HttpRouter, StaticFilesHandler};
 
 use postgres::{PostgresConnection, NoSsl};
 
+use std::collections::TreeMap;
+use serialize::json::ToJson;
 use serialize::json;
 
 #[deriving(Decodable, Encodable)]
 struct Todo {
     title: String,
     is_completed: bool,
+}
+
+// Specify encoding method manually
+impl ToJson for Vec<Todo> {
+    fn to_json(&self) -> json::Json {
+        let todos = self.iter().map({|todo| json::encode(todo) }).collect::<Vec<_>>();
+
+        let mut d = TreeMap::new();
+        d.insert("todos".to_string(), todos.to_json());
+        
+        json::Object(d)
+    }
 }
 
 fn main() {
