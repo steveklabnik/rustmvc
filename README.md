@@ -15,10 +15,10 @@ You'll need a postgres instance running on localhost, with a
 going...
 
 ```bash
-$ git clone https://github.com/steveklabnik/rustmvc
-$ cd rustmvc
-$ cargo build
-$ ./target/create_databases # you only need this the first time
-$ cargo run
-$ firefox http://localhost:6767/ # in a different shell, of course
+git clone https://github.com/steveklabnik/rustmvc
+cd rustmvc
+cargo build
+./target/create_databases # you only need this the first time
+cargo run
+firefox http://localhost:6767/ # in a different shell, of course
 ```
