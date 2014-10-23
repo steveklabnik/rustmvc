@@ -19,6 +19,6 @@ $ git clone https://github.com/steveklabnik/rustmvc
 $ cd rustmvc
 $ cargo build
 $ ./target/create_databases # you only need this the first time
-$ cargo run
+$ ./target/rustmvc
 $ firefox http://localhost:6767/ # in a different shell, of course
 ```
