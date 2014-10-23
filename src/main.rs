@@ -1,11 +1,13 @@
 extern crate nickel;
 extern crate postgres;
 extern crate serialize;
+extern crate http;
 
+use http::status;
 use std::io::net::ip::Ipv4Addr;
-use nickel::{Nickel, Request, Response, HttpRouter, StaticFilesHandler};
+use nickel::{ Nickel, Request, Response, HttpRouter, StaticFilesHandler, JsonBody, QueryString };
 
-use postgres::{PostgresConnection, NoSsl};
+use postgres::{ PostgresConnection, NoSsl };
 
 use std::collections::TreeMap;
 use serialize::json::ToJson;
@@ -24,7 +26,7 @@ impl ToJson for Vec<Todo> {
 
         let mut d = TreeMap::new();
         d.insert("todos".to_string(), todos.to_json());
-        
+
         json::Object(d)
     }
 }
@@ -33,13 +35,16 @@ fn main() {
     let mut server = Nickel::new();
 
     server.utilize(StaticFilesHandler::new("frontend/"));
+    server.utilize(Nickel::json_body_parser());
+    server.utilize(Nickel::query_string());
 
-    server.get("/todos", todos_handler);
-    
+    server.get("/todos", get_todos);
+    server.post("/todos", post_todo);
+
     server.listen(Ipv4Addr(127, 0, 0, 1), 6767);
 }
 
-fn todos_handler (request: &Request, response: &mut Response) { 
+fn get_todos (request: &Request, response: &mut Response) {
     let conn = PostgresConnection::connect("postgres://rustmvc@localhost",
                                            &NoSsl).unwrap();
 
@@ -56,5 +61,13 @@ fn todos_handler (request: &Request, response: &mut Response) {
 
     response
         .content_type("json")
-        .send(format!("{{\"todos\":{}}}", results)); 
+        .send(format!("{{\"todos\":{}}}", results));
 }
+
+fn post_todo (request: &Request, response: &mut Response) {
+    match request.json_as::<Todo>() {
+        Some(t) => response.send(format!("{}", json::encode(&t))),
+        None => response.status_code(http::status::BadRequest).send("{\"error\":\"cannot be parsed\"}"),
+    };
+}
+
