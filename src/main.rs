@@ -1,8 +1,13 @@
 extern crate nickel;
+extern crate postgres;
 extern crate serialize;
 
 use std::io::net::ip::Ipv4Addr;
 use nickel::{Nickel, Request, Response, HttpRouter, StaticFilesHandler};
+
+use postgres::{PostgresConnection, NoSsl};
+
+use serialize::json;
 
 #[deriving(Decodable, Encodable)]
 struct Todo {
@@ -21,5 +26,21 @@ fn main() {
 }
 
 fn todos_handler (request: &Request, response: &mut Response) { 
-    response.send("{\"todos\":[]}"); 
+    let conn = PostgresConnection::connect("postgres://rustmvc@localhost",
+                                           &NoSsl).unwrap();
+
+    let stmt = conn.prepare("SELECT title, is_completed FROM todos")
+        .unwrap();
+    let results = stmt.query([]).unwrap().map(|row| {
+        Todo {
+            title: row.get(0u),
+            is_completed: row.get(1u),
+        }
+    }).collect::<Vec<Todo>>();
+
+    let results = json::encode(&results);
+
+    response
+        .content_type("json")
+        .send(format!("{{\"todos\":{}}}", results)); 
 }
