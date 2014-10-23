@@ -13,6 +13,7 @@ use serialize::json;
 
 #[deriving(Decodable, Encodable)]
 struct Todo {
+    id: i32,
     title: String,
     is_completed: bool,
 }
@@ -43,12 +44,13 @@ fn todos_handler (request: &Request, response: &mut Response) {
     let conn = PostgresConnection::connect("postgres://rustmvc@localhost",
                                            &NoSsl).unwrap();
 
-    let stmt = conn.prepare("SELECT title, is_completed FROM todos")
+    let stmt = conn.prepare("SELECT id, title, is_completed FROM todos")
         .unwrap();
     let results = stmt.query([]).unwrap().map(|row| {
         Todo {
-            title: row.get(0u),
-            is_completed: row.get(1u),
+            id: row.get(0u),
+            title: row.get(1u),
+            is_completed: row.get(2u),
         }
     }).collect::<Vec<Todo>>();
 
