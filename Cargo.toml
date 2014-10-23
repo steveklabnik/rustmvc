@@ -7,3 +7,7 @@ authors = ["Steve Klabnik <steve@steveklabnik.com>"]
 [dependencies.nickel]
 
 git = "https://github.com/nickel-org/nickel.rs.git"
+
+[dependencies.postgres]
+
+git = "https://github.com/sfackler/rust-postgres.git"
