@@ -1,0 +1,9 @@
+[package]
+
+name = "rustmvc"
+version = "0.0.1"
+authors = ["Steve Klabnik <steve@steveklabnik.com>"]
+
+[dependencies.nickel]
+
+git = "https://github.com/nickel-org/nickel.rs.git"
