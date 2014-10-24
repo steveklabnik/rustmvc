@@ -23,8 +23,8 @@ When you've got that going...
 ```bash
 $ git clone https://github.com/steveklabnik/rustmvc
 $ cd rustmvc
-$ ./target/create_databases # you only need this the first time
 $ cargo build
+$ ./target/create_databases # you only need this the first time
 $ ./target/rustmvc
 $ firefox http://localhost:6767/ # in a different shell, of course
 $ curl --data "{\"title\":\"Title ha ha ha\",\"is_completed\":false}" http://localhost:6767/todos
