@@ -1,6 +1,6 @@
 # rustmvc
 
-[![Build Status](https://travis-ci.org/zizkovrb/rustmvc.svg)](https://travis-ci.org/zizkovrb/rustmvc)
+[![Build Status](https://travis-ci.org/steveklabnik/rustmvc.svg)](https://travis-ci.org/steveklabnik/rustmvc)
 
 This is a [TodoMVC](http://todomvc.com/) implementation, using
 [Ember](http://emberjs.com/) on the front end and
