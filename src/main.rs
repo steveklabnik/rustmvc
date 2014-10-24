@@ -65,9 +65,18 @@ fn get_todos (request: &Request, response: &mut Response) {
 }
 
 fn post_todo (request: &Request, response: &mut Response) {
-    match request.json_as::<Todo>() {
-        Some(t) => response.send(format!("{}", json::encode(&t))),
-        None => response.status_code(http::status::BadRequest).send("{\"error\":\"cannot be parsed\"}"),
+    let (status, body) = match request.json_as::<Todo>() {
+        Some(t) => (http::status::Created, store_todo(t)),
+        None => (http::status::BadRequest, "{\"error\":\"cannot be parsed\"}".to_string()),
     };
+
+    response.status_code(status).send(body);
 }
 
+fn store_todo(todo: Todo) -> String {
+    let conn = PostgresConnection::connect("postgres://rustmvc@localhost", &NoSsl).unwrap();
+
+    conn.execute("INSERT INTO todos (title, is_completed) VALUES ($1, $2)", &[&todo.title, &todo.is_completed]).unwrap();
+
+    json::encode(&todo)
+}
