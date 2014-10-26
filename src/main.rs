@@ -21,7 +21,7 @@ use postgres::{
 };
 
 use std::collections::TreeMap;
-use serialize::json::ToJson;
+use serialize::json::{ToJson, Json};
 use serialize::json;
 
 #[deriving(Decodable, Encodable)]
@@ -56,7 +56,7 @@ fn main() {
     server.listen(Ipv4Addr(127, 0, 0, 1), 6767);
 }
 
-fn get_todos(request: &Request, response: &mut Response) {
+fn get_todos(_: &Request, _: &mut Response) -> Json {
     // this isn't super secure but it's also just a toy so whatever
     let conn = PostgresConnection::connect("postgres://rustmvc@localhost",
                                            &NoSsl).unwrap();
@@ -70,20 +70,14 @@ fn get_todos(request: &Request, response: &mut Response) {
         }
     }).collect::<Vec<Todo>>();
 
-    let results = results.to_json();
-
-    response
-        .content_type("json")
-        .send(format!("{}", results));
+    results.to_json()
 }
 
-fn post_todo(request: &Request, response: &mut Response) {
-    let (status, body) = match request.json_as::<Todo>() {
+fn post_todo(request: &Request, _: &mut Response) -> (status::Status, String) {
+    match request.json_as::<Todo>() {
         Some(t) => (http::status::Created, store_todo(t)),
         None => (http::status::BadRequest, "{\"error\":\"cannot be parsed\"}".to_string()),
-    };
-
-    response.status_code(status).send(body);
+    }
 }
 
 fn store_todo(todo: Todo) -> String {
