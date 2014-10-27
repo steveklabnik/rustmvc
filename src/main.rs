@@ -34,7 +34,7 @@ struct Todo {
 // Specify encoding method manually
 impl ToJson for Vec<Todo> {
     fn to_json(&self) -> json::Json {
-        let todos = self.iter().map({|todo| json::encode(todo) }).collect::<Vec<_>>();
+        let todos = self.iter().map(json::encode).collect::<Vec<_>>();
 
         let mut d = TreeMap::new();
         d.insert("todos".to_string(), todos.to_json());
