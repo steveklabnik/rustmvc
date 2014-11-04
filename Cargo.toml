@@ -2,7 +2,7 @@
 
 name = "rustmvc"
 version = "0.0.1"
-authors = ["Steve Klabnik <steve@steveklabnik.com>"]
+authors = ["Steve Klabnik <steve@steveklabnik.com>", "Josef Pospíšil <josef.pospisil@laststar.eu>"]
 
 [dependencies.nickel]
 

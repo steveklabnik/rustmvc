@@ -11,8 +11,7 @@ use nickel::{
     Response,
     HttpRouter,
     StaticFilesHandler,
-    JsonBody,
-    QueryString
+    JsonBody
 };
 
 use postgres::{
@@ -45,6 +44,7 @@ impl ToJson for Vec<Todo> {
 
 fn main() {
     let mut server = Nickel::new();
+    let port = 6767u16;
 
     server.utilize(StaticFilesHandler::new("frontend/"));
     server.utilize(Nickel::json_body_parser());
@@ -53,7 +53,8 @@ fn main() {
     server.get( "/todos", get_todos);
     server.post("/todos", post_todo);
 
-    server.listen(Ipv4Addr(127, 0, 0, 1), 6767);
+    println!("Server listening on port {}", port);
+    server.listen(Ipv4Addr(127, 0, 0, 1), port);
 }
 
 fn get_todos(_: &Request, _: &mut Response) -> Json {
