@@ -104,7 +104,7 @@ dependencies = [
 [[package]]
 name = "postgres"
 version = "0.0.0"
-source = "git+https://github.com/sfackler/rust-postgres.git#8ffc761ecc772f4c83040542af89bc9b93d832c8"
+source = "git+https://github.com/sfackler/rust-postgres.git#4f80c3296700de592d58ff841d458bb3f6cd678e"
 dependencies = [
  "openssl 0.0.0 (git+https://github.com/sfackler/rust-openssl)",
  "phf 0.0.0 (git+https://github.com/sfackler/rust-phf)",
