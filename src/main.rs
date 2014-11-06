@@ -15,7 +15,7 @@ use nickel::{
 };
 
 use postgres::{
-    PostgresConnection,
+    Connection,
     NoSsl
 };
 
@@ -59,7 +59,7 @@ fn main() {
 
 fn get_todos(_: &Request, _: &mut Response) -> Json {
     // this isn't super secure but it's also just a toy so whatever
-    let conn = PostgresConnection::connect("postgres://rustmvc@localhost",
+    let conn = Connection::connect("postgres://rustmvc@localhost",
                                            &NoSsl).unwrap();
 
     let stmt = conn.prepare("SELECT id, title, is_completed FROM todos").unwrap();
@@ -82,7 +82,7 @@ fn post_todo(request: &Request, _: &mut Response) -> (status::Status, String) {
 }
 
 fn store_todo(todo: Todo) -> String {
-    let conn = PostgresConnection::connect("postgres://rustmvc@localhost", &NoSsl).unwrap();
+    let conn = Connection::connect("postgres://rustmvc@localhost", &NoSsl).unwrap();
 
     conn.execute("INSERT INTO todos (title, is_completed) VALUES ($1, $2)",
                  &[&todo.title, &todo.is_completed]).unwrap();

@@ -1,9 +1,9 @@
 extern crate postgres;
 
-use postgres::{PostgresConnection, NoSsl};
+use postgres::{Connection, NoSsl};
 
 fn main() {
-    let conn = PostgresConnection::connect("postgres://rustmvc@localhost",
+    let conn = Connection::connect("postgres://rustmvc@localhost",
                                            &NoSsl).unwrap();
 
     conn.execute("CREATE TABLE todos (
