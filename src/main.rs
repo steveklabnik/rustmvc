@@ -2,6 +2,8 @@ extern crate nickel;
 extern crate postgres;
 extern crate serialize;
 extern crate http;
+extern crate r2d2;
+extern crate r2d2_postgres;
 
 use http::status;
 use std::io::net::ip::Ipv4Addr;
@@ -11,13 +13,19 @@ use nickel::{
     Response,
     HttpRouter,
     StaticFilesHandler,
-    JsonBody
+    JsonBody,
+    Middleware,
+    MiddlewareResult,
+    Continue,
 };
 
 use postgres::{
     Connection,
     NoSsl
 };
+
+use r2d2_postgres::PostgresPoolManager;
+use r2d2::PoolManager;
 
 use std::collections::TreeMap;
 use serialize::json::{ToJson, Json};
@@ -42,13 +50,39 @@ impl ToJson for Vec<Todo> {
     }
 }
 
+struct ConnectionPool {
+    pool: PostgresPoolManager,
+}
+
+impl ConnectionPool {
+    fn new() -> ConnectionPool {
+        // this isn't super secure but it's also just a toy so whatever
+        ConnectionPool {
+            pool: PostgresPoolManager::new("postgres://rustmvc@localhost", NoSsl),
+        }
+    }
+}
+
+impl Middleware for ConnectionPool {
+    fn invoke(&self, req: &mut Request, _res: &mut Response) -> MiddlewareResult {
+        println!("Connection pool middleware called");
+        let conn = self.pool.connect().ok().expect("could not grab a connection");
+
+        req.map.insert(conn);
+
+        Ok(Continue)
+    }
+}
+
 fn main() {
     let mut server = Nickel::new();
     let port = 6767u16;
 
+
     server.utilize(StaticFilesHandler::new("frontend/"));
     server.utilize(Nickel::json_body_parser());
     server.utilize(Nickel::query_string());
+    server.utilize(ConnectionPool::new());
 
     server.get( "/todos", get_todos);
     server.post("/todos", post_todo);
@@ -57,10 +91,9 @@ fn main() {
     server.listen(Ipv4Addr(127, 0, 0, 1), port);
 }
 
-fn get_todos(_: &Request, _: &mut Response) -> Json {
-    // this isn't super secure but it's also just a toy so whatever
-    let conn = Connection::connect("postgres://rustmvc@localhost",
-                                           &NoSsl).unwrap();
+fn get_todos(req: &Request, _: &mut Response) -> Json {
+    let opt_conn: Option<&Connection> = req.map.get();
+    let conn = opt_conn.unwrap();
 
     let stmt = conn.prepare("SELECT id, title, is_completed FROM todos").unwrap();
     let results = stmt.query([]).unwrap().map(|row| {
@@ -74,15 +107,19 @@ fn get_todos(_: &Request, _: &mut Response) -> Json {
     results.to_json()
 }
 
-fn post_todo(request: &Request, _: &mut Response) -> (status::Status, String) {
-    match request.json_as::<Todo>() {
-        Some(t) => (http::status::Created, store_todo(t)),
+fn post_todo(req: &Request, _: &mut Response) -> (status::Status, String) {
+    println!("called post_todo");
+    let opt_conn: Option<&Connection> = req.map.get();
+    let conn = opt_conn.unwrap();
+
+    match req.json_as::<Todo>() {
+        Some(t) => (http::status::Created, store_todo(t, conn)),
         None => (http::status::BadRequest, "{\"error\":\"cannot be parsed\"}".to_string()),
     }
 }
 
-fn store_todo(todo: Todo) -> String {
-    let conn = Connection::connect("postgres://rustmvc@localhost", &NoSsl).unwrap();
+fn store_todo(todo: Todo, conn: &Connection) -> String {
+    println!("called store_todo");
 
     conn.execute("INSERT INTO todos (title, is_completed) VALUES ($1, $2)",
                  &[&todo.title, &todo.is_completed]).unwrap();
