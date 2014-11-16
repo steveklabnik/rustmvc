@@ -38,14 +38,12 @@ struct Todo {
     is_completed: bool,
 }
 
-// Specify encoding method manually
-impl ToJson for Vec<Todo> {
+impl ToJson for Todo {
     fn to_json(&self) -> json::Json {
-        let todos = self.iter().map(json::encode).collect::<Vec<_>>();
-
         let mut d = TreeMap::new();
-        d.insert("todos".to_string(), todos.to_json());
-
+        d.insert("id".to_string(), self.id.to_json());
+        d.insert("title".to_string(), self.title.to_json());
+        d.insert("is_completed".to_string(), self.is_completed.to_json());
         json::Object(d)
     }
 }
@@ -104,7 +102,10 @@ fn get_todos(req: &Request, _: &mut Response) -> Json {
         }
     }).collect::<Vec<Todo>>();
 
-    results.to_json()
+    let mut d = TreeMap::new();
+    d.insert("todos".to_string(), results.to_json());
+
+    d.to_json()
 }
 
 fn post_todo(req: &Request, _: &mut Response) -> (status::Status, String) {
