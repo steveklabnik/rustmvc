@@ -6,7 +6,7 @@ authors = ["Steve Klabnik <steve@steveklabnik.com>", "Josef Pospíšil <josef.po
 
 [dependencies.nickel]
 
-git = "https://github.com/iterion/nickel.rs.git"
+git = "https://github.com/nickel-org/nickel.rs.git"
 
 [dependencies.postgres]
 
@@ -15,3 +15,7 @@ git = "https://github.com/sfackler/rust-postgres.git"
 [dependencies.r2d2_postgres]
 
 git = "https://github.com/sfackler/r2d2-postgres.git"
+
+[dependencies.time]
+
+git = "https://github.com/rust-lang/time.git"

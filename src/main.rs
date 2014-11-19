@@ -21,7 +21,7 @@ use nickel::{
 
 use postgres::{
     Connection,
-    NoSsl
+    SslMode
 };
 
 use r2d2_postgres::PostgresPoolManager;
@@ -56,7 +56,7 @@ impl ConnectionPool {
     fn new() -> ConnectionPool {
         // this isn't super secure but it's also just a toy so whatever
         ConnectionPool {
-            pool: PostgresPoolManager::new("postgres://rustmvc@localhost", NoSsl),
+            pool: PostgresPoolManager::new("postgres://rustmvc@localhost", SslMode::None),
         }
     }
 }
@@ -94,7 +94,7 @@ fn get_todos(req: &Request, _: &mut Response) -> Json {
     let conn = opt_conn.unwrap();
 
     let stmt = conn.prepare("SELECT id, title, is_completed FROM todos").unwrap();
-    let results = stmt.query([]).unwrap().map(|row| {
+    let results = stmt.query(&[]).unwrap().map(|row| {
         Todo {
             id: row.get(0u),
             title: row.get(1u),
