@@ -21,7 +21,7 @@ use nickel::{
 
 use postgres::{
     Connection,
-    NoSsl
+    SslMode
 };
 
 use r2d2_postgres::PostgresPoolManager;
@@ -38,14 +38,12 @@ struct Todo {
     is_completed: bool,
 }
 
-// Specify encoding method manually
-impl ToJson for Vec<Todo> {
+impl ToJson for Todo {
     fn to_json(&self) -> json::Json {
-        let todos = self.iter().map(json::encode).collect::<Vec<_>>();
-
         let mut d = TreeMap::new();
-        d.insert("todos".to_string(), todos.to_json());
-
+        d.insert("id".to_string(), self.id.to_json());
+        d.insert("title".to_string(), self.title.to_json());
+        d.insert("is_completed".to_string(), self.is_completed.to_json());
         json::Object(d)
     }
 }
@@ -58,7 +56,7 @@ impl ConnectionPool {
     fn new() -> ConnectionPool {
         // this isn't super secure but it's also just a toy so whatever
         ConnectionPool {
-            pool: PostgresPoolManager::new("postgres://rustmvc@localhost", NoSsl),
+            pool: PostgresPoolManager::new("postgres://rustmvc@localhost", SslMode::None),
         }
     }
 }
@@ -96,7 +94,7 @@ fn get_todos(req: &Request, _: &mut Response) -> Json {
     let conn = opt_conn.unwrap();
 
     let stmt = conn.prepare("SELECT id, title, is_completed FROM todos").unwrap();
-    let results = stmt.query([]).unwrap().map(|row| {
+    let results = stmt.query(&[]).unwrap().map(|row| {
         Todo {
             id: row.get(0u),
             title: row.get(1u),
@@ -104,7 +102,10 @@ fn get_todos(req: &Request, _: &mut Response) -> Json {
         }
     }).collect::<Vec<Todo>>();
 
-    results.to_json()
+    let mut d = TreeMap::new();
+    d.insert("todos".to_string(), results.to_json());
+
+    d.to_json()
 }
 
 fn post_todo(req: &Request, _: &mut Response) -> (status::Status, String) {
