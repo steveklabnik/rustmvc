@@ -1,0 +1,14 @@
+[package]
+
+name = "rustmvc"
+version = "0.0.1"
+authors = ["Steve Klabnik <steve@steveklabnik.com>", "Josef Pospíšil <josef.pospisil@laststar.eu>"]
+
+[dependencies.hyper]
+git = "https://github.com/hyperium/hyper"
+
+[dependencies.postgres]
+git = "https://github.com/sfackler/rust-postgres.git"
+
+[dependencies.r2d2_postgres]
+git = "https://github.com/sfackler/r2d2-postgres.git"
