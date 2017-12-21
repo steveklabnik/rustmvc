@@ -4,7 +4,7 @@
 
 This is a [TodoMVC](http://todomvc.com/) implementation, using
 [Ember](http://emberjs.com/) on the front end and
-[Nickel.rs](http://nickel.rs/) on the back end.
+[Nickel.rs](https://nickel-org.github.io/) on the back end.
 
 In other words: Rust + Ember, sitting in a tree. K I S...
 
